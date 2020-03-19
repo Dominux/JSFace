@@ -39,17 +39,7 @@ async function main() {
     ]
     */
 
-    for (let i = 0; i < predictions.length; i++) {
-      const keypoints = predictions[i].scaledMesh;
-
-      // Log facial keypoints.
-      for (let j = 0; j < keypoints.length; j++) {
-        const [x, y, z] = keypoints[j]
-
-        // console.log(`Keypoint ${j}: [${x}, ${y}, ${z}]`)
-      }
-    }
-    console.log(predictions)
+    return createScene(predictions[0].mesh)
   }
 }
 
@@ -58,8 +48,19 @@ navigator.mediaDevices.getUserMedia(constraints)
   .then(function (mediaStream) {
     const video = document.querySelector('video')
     video.srcObject = mediaStream
-    video.onloadeddata = () => {
+    video.onloadeddata = async () => {
       video.play()
-      main()
+
+      scene = await main()
+
+      // run the render loop
+      engine.runRenderLoop(function () {
+        scene.render();
+      });
+
+      // the canvas/window resize event handler
+      window.addEventListener('resize', function () {
+        engine.resize();
+      })
     }
   })
